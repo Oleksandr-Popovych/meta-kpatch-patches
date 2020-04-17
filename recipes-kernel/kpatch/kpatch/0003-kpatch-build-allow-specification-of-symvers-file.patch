@@ -1,0 +1,49 @@
+diff --git a/kpatch-build/kpatch-build b/kpatch-build/kpatch-build
+index 8c937e3..00612f5 100755
+--- a/kpatch-build/kpatch-build
++++ b/kpatch-build/kpatch-build
+@@ -55,6 +55,7 @@ DEBUG_KCFLAGS=""
+ declare -a PATCH_LIST
+ APPLIED_PATCHES=0
+ OOT_MODULE=
++SYMVERSFILE=""
+ 
+ warn() {
+ 	echo "ERROR: $1" >&2
+@@ -200,7 +201,6 @@ find_dirs() {
+ }
+ 
+ find_core_symvers() {
+-	SYMVERSFILE=""
+ 	if [[ -e "$SCRIPTDIR/create-diff-object" ]]; then
+ 		# git repo
+ 		SYMVERSFILE="$DATADIR/core/Module.symvers"
+@@ -453,6 +453,7 @@ usage() {
+ 	echo "		                   (can be specified multiple times)" >&2
+ 	echo "		-e, --oot-module   Enable patching out-of-tree module," >&2
+ 	echo "		                   specify current version of module" >&2
++	echo "		--symvers          Specify the kernel symvers file" >&2
+ 	echo "		--cross-compile    Specify the prefix used for all executables" >&2
+ 	echo "		                   used during compilation" >&2
+ 	echo "		--distro           Override distro name" >&2
+@@ -461,7 +462,7 @@ usage() {
+ 	echo "		                   (not recommended)" >&2
+ }
+ 
+-options="$(getopt -o ha:r:s:c:v:j:t:n:o:de: -l "help,archversion:,sourcerpm:,sourcedir:,config:,vmlinux:,jobs:,target:,name:,output:,oot-module:,debug,cross-compile:,distro:,skip-gcc-check,skip-cleanup" -- "$@")" || die "getopt failed"
++options="$(getopt -o ha:r:s:c:v:j:t:n:o:de: -l "help,archversion:,sourcerpm:,sourcedir:,config:,vmlinux:,jobs:,target:,name:,output:,oot-module:,symvers:,debug,cross-compile:,distro:,skip-gcc-check,skip-cleanup" -- "$@")" || die "getopt failed"
+ 
+ eval set -- "$options"
+ 
+@@ -524,6 +525,11 @@ while [[ $# -gt 0 ]]; do
+ 		OOT_MODULE="$(readlink -f "$2")"
+ 		shift
+ 		;;
++	--symvers)
++		[[ ! -f "$2" ]] && die "symvers file '$2' not found"
++               SYMVERSFILE="$(readlink -f "$2")"
++               shift
++               ;;
+ 	--cross-compile)
+ 		KPATCH_CROSS_COMPILE="$2"
+ 		shift

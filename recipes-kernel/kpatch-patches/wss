@@ -1,0 +1,45 @@
+SUMMARY = ""
+DESCRIPTION = ""
+
+LICENSE = "CLOSED"
+
+DEPENDS += "kpatch-build"
+RDEPENDS_${PN} += "kpatch"
+
+SRC_URI = "file://kpatch-patches/*file://kpatch-patches/*.patch;downloadfilename=kpatch-patches/*"
+
+LIVEPATCH_MODULES_PATH = "/home/root/livepatch-modules"
+
+do_get_patch_names() {
+	PATCHES=`ls ${S}/kpatch-patches`
+	echo $PATCHES
+
+	if [[ -z $PATCHES ]]; then
+#		patches = "${@d.getVar("PATCHES", True).split()}"
+	else
+#		declare -a patches
+	fi
+
+#	"${@bb.setVar("PATCHES", patches)}"
+	
+}
+addtask do_get_patch_names after do_fetch before do_patch
+
+do_compile() {
+	for patch in $(PATCHES[@])
+	do
+		kpatch-build -t vmlinux -s ${STAGING_KERNEL_DIR} -o ${B} -n "$patch" $patch
+	done
+}
+
+do_install() {
+	install -d ${D}${LIVEPATCH_MODULES_PATH}
+	for patch in ${PATCHES[@]}
+	do
+		install -m 0511 ${B}/${patch}.ko ${D}${LIVEPATCH_MODULES_PATH}
+	done
+}
+
+FILES_${PN} = "${LIVEPATCH_MODULES_PATH}/*"
+
+BBCLASSEXTEND += "native"

@@ -1,0 +1,13 @@
+diff --git a/kpatch-build/create-diff-object.c b/kpatch-build/create-diff-object.c
+index c9d2cc6..fd62142 100644
+--- a/kpatch-build/create-diff-object.c
++++ b/kpatch-build/create-diff-object.c
+@@ -2045,7 +2045,7 @@ static void kpatch_regenerate_special_section(struct kpatch_elf *kelf,
+ 		 * key.
+ 		 */
+ 		if (jump_table) {
+-			struct rela *code, *key;
++			struct rela *code = NULL, *key = NULL;
+ 			int i = 0;
+ 
+ 			list_for_each_entry(rela, &sec->relas, list) {
